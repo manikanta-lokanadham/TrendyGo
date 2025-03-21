@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Shipping and Payment Form -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Shipping & Payment Details</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'buy_now_place_order' product.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="quantity" value="{{ quantity }}">
+                        
+                        <!-- Shipping Information -->
+                        <h6 class="mb-3">Shipping Information</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="shipping_name" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="shipping_name" name="shipping_name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="shipping_phone" class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="shipping_phone" name="shipping_phone" required>
+                            </div>
+                            <div class="col-12">
+                                <label for="shipping_address" class="form-label">Address</label>
+                                <input type="text" class="form-control" id="shipping_address" name="shipping_address" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="shipping_city" class="form-label">City</label>
+                                <input type="text" class="form-control" id="shipping_city" name="shipping_city" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="shipping_state" class="form-label">State</label>
+                                <input type="text" class="form-control" id="shipping_state" name="shipping_state" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="shipping_country" class="form-label">Country</label>
+                                <input type="text" class="form-control" id="shipping_country" name="shipping_country" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="shipping_postal_code" class="form-label">Postal Code</label>
+                                <input type="text" class="form-control" id="shipping_postal_code" name="shipping_postal_code" required>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Payment Method -->
+                        <h6 class="mb-3">Payment Method</h6>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="cod" value="cod" checked>
+                                    <label class="form-check-label" for="cod">
+                                        Cash on Delivery
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="card" value="card">
+                                    <label class="form-check-label" for="card">
+                                        Credit/Debit Card
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="upi" value="upi">
+                                    <label class="form-check-label" for="upi">
+                                        UPI
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <button class="btn btn-success w-100" type="submit">
+                            Place Order
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Summary Sidebar -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex mb-3">
+                        <div class="flex-shrink-0">
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-thumbnail" style="width: 80px;">
+                            {% else %}
+                                <img src="{% static 'images/no-image.png' %}" alt="No Image" class="img-thumbnail" style="width: 80px;">
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-1">{{ product.name }}</h6>
+                            <p class="mb-1">Quantity: {{ quantity }}</p>
+                            <p class="mb-0">Price: ${{ product.price }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="border-top pt-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal:</span>
+                            <span>${{ subtotal }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Shipping:</span>
+                            <span>${{ shipping_cost }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Tax (10%):</span>
+                            <span>${{ tax }}</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between">
+                            <strong>Total:</strong>
+                            <strong>${{ total }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

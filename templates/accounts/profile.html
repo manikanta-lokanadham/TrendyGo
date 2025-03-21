@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">My Account</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'dashboard' %}" class="list-group-item list-group-item-action {% if active_tab == 'dashboard' %}active{% endif %}">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </a>
+                    <a href="{% url 'profile' %}" class="list-group-item list-group-item-action {% if active_tab == 'profile' %}active{% endif %}">
+                        <i class="fas fa-user me-2"></i>My Profile
+                    </a>
+                    <a href="{% url 'orders_list' %}" class="list-group-item list-group-item-action {% if active_tab == 'orders' %}active{% endif %}">
+                        <i class="fas fa-shopping-bag me-2"></i>My Orders
+                    </a>
+                    <a href="{% url 'account_wishlist' %}" class="list-group-item list-group-item-action {% if active_tab == 'wishlist' %}active{% endif %}">
+                        <i class="fas fa-heart me-2"></i>Wishlist
+                    </a>
+                    <a href="{% url 'addresses' %}" class="list-group-item list-group-item-action {% if active_tab == 'addresses' %}active{% endif %}">
+                        <i class="fas fa-map-marker-alt me-2"></i>Addresses
+                    </a>
+                    <a href="{% url 'change_password' %}" class="list-group-item list-group-item-action {% if active_tab == 'password' %}active{% endif %}">
+                        <i class="fas fa-lock me-2"></i>Change Password
+                    </a>
+                    <a href="{% url 'logout' %}" class="list-group-item list-group-item-action text-danger">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Edit Profile</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        {% if messages %}
+                        <div class="alert alert-success">
+                            {% for message in messages %}
+                                {{ message }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <!-- Profile Picture -->
+                            <div class="col-md-3 text-center mb-4">
+                                {% if user.profile.avatar %}
+                                    <img src="{{ user.profile.avatar.url }}" alt="Profile Picture" class="img-thumbnail rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                                {% else %}
+                                    <img src="{% static 'images/default-avatar.png' %}" alt="Default Profile Picture" class="img-thumbnail rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                                {% endif %}
+                                <div class="mb-3">
+                                    <label for="{{ form.avatar.id_for_label }}" class="form-label">Change Profile Picture</label>
+                                    {{ form.avatar }}
+                                    {% if form.avatar.errors %}
+                                        <div class="text-danger">
+                                            {{ form.avatar.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Profile Information -->
+                            <div class="col-md-9">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name</label>
+                                        {{ form.first_name }}
+                                        {% if form.first_name.errors %}
+                                            <div class="text-danger">
+                                                {{ form.first_name.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name</label>
+                                        {{ form.last_name }}
+                                        {% if form.last_name.errors %}
+                                            <div class="text-danger">
+                                                {{ form.last_name.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                                        {{ form.email }}
+                                        {% if form.email.errors %}
+                                            <div class="text-danger">
+                                                {{ form.email.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="{{ form.phone.id_for_label }}" class="form-label">Phone Number</label>
+                                        {{ form.phone }}
+                                        {% if form.phone.errors %}
+                                            <div class="text-danger">
+                                                {{ form.phone.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="{{ form.bio.id_for_label }}" class="form-label">Bio</label>
+                                        {{ form.bio }}
+                                        {% if form.bio.errors %}
+                                            <div class="text-danger">
+                                                {{ form.bio.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

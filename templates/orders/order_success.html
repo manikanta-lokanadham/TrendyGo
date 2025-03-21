@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order Placed Successfully{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-body text-center">
+                    <!-- Success Icon -->
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                    </div>
+                    
+                    <!-- Success Message -->
+                    <h2 class="mb-4">Thank You for Your Order!</h2>
+                    <p class="lead mb-4">Your order has been placed successfully.</p>
+                    
+                    <!-- Order Details -->
+                    <div class="alert alert-info mb-4">
+                        <h5 class="mb-2">Order ID: <strong>{{ order.order_id }}</strong></h5>
+                        <p class="mb-0">We'll send you an email confirmation with order details.</p>
+                    </div>
+                    
+                    <!-- Order Summary -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Order Summary</h5>
+                        </div>
+                        <div class="card-body">
+                            {% for item in order.items.all %}
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="d-flex align-items-center">
+                                    {% if item.product.image %}
+                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="img-thumbnail me-3" style="width: 60px;">
+                                    {% else %}
+                                        <img src="{% static 'images/no-image.png' %}" alt="No Image" class="img-thumbnail me-3" style="width: 60px;">
+                                    {% endif %}
+                                    <div>
+                                        <h6 class="mb-0">{{ item.product.name }}</h6>
+                                        <small class="text-muted">Quantity: {{ item.quantity }}</small>
+                                    </div>
+                                </div>
+                                <span>${{ item.total }}</span>
+                            </div>
+                            {% endfor %}
+                            
+                            <hr>
+                            
+                            <!-- Order Totals -->
+                            <div class="text-end">
+                                <p class="mb-1">Subtotal: ${{ order.subtotal }}</p>
+                                <p class="mb-1">Shipping: ${{ order.shipping_cost }}</p>
+                                <p class="mb-1">Tax: ${{ order.tax }}</p>
+                                <h5 class="mb-0">Total: ${{ order.total }}</h5>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Shipping Details -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Shipping Details</h5>
+                        </div>
+                        <div class="card-body text-start">
+                            <p class="mb-1"><strong>Name:</strong> {{ order.first_name }} {{ order.last_name }}</p>
+                            <p class="mb-1"><strong>Email:</strong> {{ order.email }}</p>
+                            <p class="mb-1"><strong>Phone:</strong> {{ order.phone }}</p>
+                            <p class="mb-1"><strong>Address:</strong></p>
+                            <p class="mb-0">{{ order.shipping_address|linebreaks }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'track_order' order.order_id %}" class="btn btn-primary">
+                            <i class="fas fa-truck me-2"></i>Track Order
+                        </a>
+                        <a href="{% url 'download_invoice' order.order_id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-file-invoice me-2"></i>Download Invoice
+                        </a>
+                        <a href="{% url 'products_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-shopping-cart me-2"></i>Continue Shopping
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

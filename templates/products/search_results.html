@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Results - {{ query }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-3">Search Results for "{{ query }}"</h2>
+            <p class="text-muted">Found {{ total_results }} result{{ total_results|pluralize }}</p>
+        </div>
+    </div>
+
+    {% if products %}
+        <div class="row g-4">
+            {% for product in products %}
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="card h-100 product-card">
+                        <a href="{% url 'product_detail' product.slug %}" class="text-decoration-none">
+                            {% if product.images.first %}
+                                <img src="{{ product.images.first.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                            {% else %}
+                                <img src="{{ product.default_image }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title text-dark">{{ product.name }}</h5>
+                                <p class="card-text text-muted mb-2">{{ product.category.name }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="fw-bold text-primary">${{ product.price }}</span>
+                                        {% if product.sale_price %}
+                                            <small class="text-decoration-line-through text-muted ms-2">${{ product.sale_price }}</small>
+                                        {% endif %}
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-star text-warning me-1"></i>
+                                        <span>{{ product.rating|default:"0.0" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                        <div class="card-footer bg-white border-top-0 d-flex justify-content-between align-items-center">
+                            <form action="{% url 'add_to_cart' product.id %}" method="POST" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-shopping-cart me-1"></i>Add to Cart
+                                </button>
+                            </form>
+                            <form action="{% url 'add_to_wishlist' product.id %}" method="POST" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="row">
+            <div class="col-12 text-center">
+                <div class="py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h3>No products found</h3>
+                    <p class="text-muted">Try searching with different keywords or browse our categories.</p>
+                    <a href="{% url 'categories_list' %}" class="btn btn-primary mt-3">
+                        <i class="fas fa-tags me-2"></i>Browse Categories
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Add New Address{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">My Account</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'dashboard' %}" class="list-group-item list-group-item-action {% if active_tab == 'dashboard' %}active{% endif %}">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </a>
+                    <a href="{% url 'profile' %}" class="list-group-item list-group-item-action {% if active_tab == 'profile' %}active{% endif %}">
+                        <i class="fas fa-user me-2"></i>My Profile
+                    </a>
+                    <a href="{% url 'orders_list' %}" class="list-group-item list-group-item-action {% if active_tab == 'orders' %}active{% endif %}">
+                        <i class="fas fa-shopping-bag me-2"></i>My Orders
+                    </a>
+                    <a href="{% url 'account_wishlist' %}" class="list-group-item list-group-item-action {% if active_tab == 'wishlist' %}active{% endif %}">
+                        <i class="fas fa-heart me-2"></i>Wishlist
+                    </a>
+                    <a href="{% url 'addresses' %}" class="list-group-item list-group-item-action {% if active_tab == 'addresses' %}active{% endif %}">
+                        <i class="fas fa-map-marker-alt me-2"></i>Addresses
+                    </a>
+                    <a href="{% url 'change_password' %}" class="list-group-item list-group-item-action {% if active_tab == 'password' %}active{% endif %}">
+                        <i class="fas fa-lock me-2"></i>Change Password
+                    </a>
+                    <a href="{% url 'logout' %}" class="list-group-item list-group-item-action text-danger">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Add New Address</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="{{ form.address_line1.id_for_label }}" class="form-label">Address Line 1 *</label>
+                                {{ form.address_line1 }}
+                                {% if form.address_line1.errors %}
+                                    <div class="text-danger">
+                                        {{ form.address_line1.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-12">
+                                <label for="{{ form.address_line2.id_for_label }}" class="form-label">Address Line 2</label>
+                                {{ form.address_line2 }}
+                                {% if form.address_line2.errors %}
+                                    <div class="text-danger">
+                                        {{ form.address_line2.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="{{ form.city.id_for_label }}" class="form-label">City *</label>
+                                {{ form.city }}
+                                {% if form.city.errors %}
+                                    <div class="text-danger">
+                                        {{ form.city.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="{{ form.state.id_for_label }}" class="form-label">State/Province *</label>
+                                {{ form.state }}
+                                {% if form.state.errors %}
+                                    <div class="text-danger">
+                                        {{ form.state.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="{{ form.postal_code.id_for_label }}" class="form-label">Postal Code *</label>
+                                {{ form.postal_code }}
+                                {% if form.postal_code.errors %}
+                                    <div class="text-danger">
+                                        {{ form.postal_code.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="{{ form.country.id_for_label }}" class="form-label">Country *</label>
+                                {{ form.country }}
+                                {% if form.country.errors %}
+                                    <div class="text-danger">
+                                        {{ form.country.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-check">
+                                    {{ form.is_default }}
+                                    <label class="form-check-label" for="{{ form.is_default.id_for_label }}">
+                                        Set as default address
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'addresses' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Back to Addresses
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Save Address
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,624 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load product_tags %}
+{% load order_tags %}
+
+{% block title %}Order #{{ order.order_id }}{% endblock %}
+
+{% block content %}
+<script>
+// Define placeholder images
+const PRODUCT_PLACEHOLDER_IMAGES = [
+    'https://images.unsplash.com/photo-1572635196237-14b3f281503f',  // Sunglasses
+    'https://images.unsplash.com/photo-1542291026-7eec264c27ff',  // Red Nike
+    'https://images.unsplash.com/photo-1523275335684-37898b6baf30',  // Watch
+    'https://images.unsplash.com/photo-1505740420928-5e560c06d30e',  // Headphones
+    'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f',  // Camera
+    'https://images.unsplash.com/photo-1585386959984-a4155224a1ad',  // Perfume
+    'https://images.unsplash.com/photo-1591337676887-a217a6970a8a',  // Laptop
+    'https://images.unsplash.com/photo-1600080972464-8e5f35f63d08',  // Smartphone
+];
+
+const CATEGORY_IMAGES = {
+    'electronics': 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147',
+    'clothing': 'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f',
+    'books': 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f',
+    'home': 'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6',
+    'sports': 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211',
+    'beauty': 'https://images.unsplash.com/photo-1596462502278-27bfdc403348',
+    'food': 'https://images.unsplash.com/photo-1606787366850-de6330128bfc',
+    'toys': 'https://images.unsplash.com/photo-1558877385-81a1c7e67d72'
+};
+
+function getPlaceholderImage(index, category) {
+    if (category && CATEGORY_IMAGES[category.toLowerCase()]) {
+        return CATEGORY_IMAGES[category.toLowerCase()];
+    }
+    return PRODUCT_PLACEHOLDER_IMAGES[index % PRODUCT_PLACEHOLDER_IMAGES.length];
+}
+</script>
+
+<div class="container py-5">
+    <!-- Order Status Banner -->
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-body p-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="d-flex align-items-center">
+                        <div class="success-checkmark me-4">
+                            <div class="check-icon">
+                                <span class="icon-line line-tip"></span>
+                                <span class="icon-line line-long"></span>
+                                <div class="icon-circle"></div>
+                                <div class="icon-fix"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="mb-1 text-success">Order Placed Successfully!</h4>
+                            <p class="text-muted mb-0">Thank you for your order</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <h5 class="mb-1">Order #{{ order.order_id }}</h5>
+                    <p class="text-muted mb-0">Placed on {{ order.created_at|date:"F d, Y" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Order Details -->
+        <div class="col-lg-8">
+            <!-- Order Items -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">Order Items</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-borderless align-middle">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th style="width: 50%">PRODUCT</th>
+                                    <th class="text-center" style="width: 15%">QUANTITY</th>
+                                    <th class="text-end" style="width: 15%">PRICE</th>
+                                    <th class="text-end" style="width: 20%">TOTAL</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.items.all %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if item.product.images.exists %}
+                                                <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.name }}" class="img-fluid rounded product-img" style="width: 80px; height: 80px; object-fit: cover;">
+                                            {% else %}
+                                                <img src="{{ item.product|get_placeholder_image:forloop.counter0 }}" 
+                                                     alt="{{ item.product.name }}" 
+                                                     class="img-fluid rounded product-img" 
+                                                     style="width: 80px; height: 80px; object-fit: cover;">
+                                            {% endif %}
+                                            <div class="ms-3">
+                                                <h6 class="mb-1">{{ item.product.name }}</h6>
+                                                <div class="d-flex align-items-center">
+                                                    {% if item.product.category %}
+                                                        <span class="badge bg-light text-dark me-2">{{ item.product.category.name }}</span>
+                                                    {% endif %}
+                                                    {% if item.product.brand %}
+                                                        <small class="text-muted">{{ item.product.brand.name }}</small>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="quantity-badge">
+                                            <span class="fw-medium">{{ item.quantity }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-end">₹{{ item.price|floatformat:2 }}</td>
+                                    <td class="text-end">₹{{ item.get_total|floatformat:2 }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4">
+                                        <div class="empty-state">
+                                            <img src="{% get_empty_state_image %}" alt="No items" class="img-fluid mb-3" style="width: 120px; height: 120px; object-fit: cover; border-radius: 10px;">
+                                            <p class="text-muted mb-0">No items found in this order.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot class="border-top">
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                                    <td class="text-end">₹{{ order.subtotal|floatformat:2 }}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Shipping:</strong></td>
+                                    <td class="text-end">₹{{ order.shipping_cost|floatformat:2 }}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Tax:</strong></td>
+                                    <td class="text-end">₹{{ order.tax_amount|floatformat:2 }}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                    <td class="text-end"><strong>₹{{ order.total_amount|floatformat:2 }}</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shipping Information -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">Shipping Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <h6>Delivery Address</h6>
+                            <p class="mb-0">{{ order.first_name }} {{ order.last_name }}</p>
+                            <p class="mb-3">{{ order.shipping_address|linebreaks }}</p>
+                            <p class="mb-1"><strong>Email:</strong> {{ order.email }}</p>
+                            <p class="mb-0"><strong>Phone:</strong> {{ order.phone }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Status -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Order Status</h5>
+                    <span class="badge {% if order.status == 'delivered' %}bg-success{% elif order.status == 'processing' %}bg-primary{% elif order.status == 'shipped' %}bg-info{% else %}bg-warning{% endif %} px-3 py-2">
+                        {{ order.status|title }}
+                    </span>
+                </div>
+                <div class="card-body p-4">
+                    <div class="order-timeline">
+                        <div class="timeline-step {% if order.status %}completed{% endif %}">
+                            <div class="timeline-icon">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">Order Placed</h6>
+                                <p class="text-muted mb-0 small">{{ order.created_at|date:"F j, Y, g:i A" }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-step {% if order.status == 'processing' or order.status == 'shipped' or order.status == 'delivered' %}completed{% endif %}">
+                            <div class="timeline-icon">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">Processing</h6>
+                                {% if order.status == 'processing' %}
+                                <p class="text-muted mb-0 small">Your order is being processed</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-step {% if order.status == 'shipped' or order.status == 'delivered' %}completed{% endif %}">
+                            <div class="timeline-icon">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">Shipped</h6>
+                                {% if order.status == 'shipped' and order.tracking_number %}
+                                <p class="text-muted mb-0 small">Tracking ID: {{ order.tracking_number }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-step {% if order.status == 'delivered' %}completed{% endif %}">
+                            <div class="timeline-icon">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">Delivered</h6>
+                                {% if order.status == 'delivered' %}
+                                <p class="text-muted mb-0 small">Your order has been delivered</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Information -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">Payment Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        {% if order.payment_status == 'completed' %}
+                            <div class="text-success mb-3">
+                                <i class="fas fa-check-circle fa-4x"></i>
+                            </div>
+                            <h5 class="text-success mb-1">Payment Successful</h5>
+                            <p class="text-muted mb-0">Transaction ID: {{ order.transaction_id }}</p>
+                        {% else %}
+                            <div class="text-warning mb-3">
+                                <i class="fas fa-clock fa-4x"></i>
+                            </div>
+                            <h5 class="text-warning mb-1">Payment Pending</h5>
+                            <p class="text-muted mb-0">Please complete your payment</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="border-top pt-3">
+                        <p class="mb-1"><strong>Payment Method:</strong></p>
+                        <p class="mb-3">{{ order.payment_method|title }}</p>
+                        <p class="mb-1"><strong>Amount Paid:</strong></p>
+                        <h4 class="mb-0">₹{{ order.total_amount|floatformat:2 }}</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-grid gap-2">
+                <a href="{% url 'track_order' order.order_id %}" class="btn btn-primary">
+                    <i class="fas fa-truck me-2"></i>Track Order
+                </a>
+                <a href="#" class="btn btn-outline-primary" onclick="window.print()">
+                    <i class="fas fa-download me-2"></i>Download Invoice
+                </a>
+                <a href="{% url 'order_history' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Orders
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Success Checkmark Animation */
+.success-checkmark {
+    width: 80px;
+    height: 80px;
+    position: relative;
+}
+
+.success-checkmark .check-icon {
+    width: 80px;
+    height: 80px;
+    position: relative;
+    border-radius: 50%;
+    box-sizing: content-box;
+    border: 4px solid #4CAF50;
+}
+
+.success-checkmark .check-icon::before {
+    top: 3px;
+    left: -2px;
+    width: 30px;
+    transform-origin: 100% 50%;
+    border-radius: 100px 0 0 100px;
+}
+
+.success-checkmark .check-icon::after {
+    top: 0;
+    left: 30px;
+    width: 60px;
+    transform-origin: 0 50%;
+    border-radius: 0 100px 100px 0;
+    animation: rotate-circle 4.25s ease-in;
+}
+
+.success-checkmark .check-icon::before, .success-checkmark .check-icon::after {
+    content: '';
+    height: 100px;
+    position: absolute;
+    background: #FFFFFF;
+    transform: rotate(-45deg);
+}
+
+.success-checkmark .check-icon .icon-line {
+    height: 5px;
+    background-color: #4CAF50;
+    display: block;
+    border-radius: 2px;
+    position: absolute;
+    z-index: 10;
+}
+
+.success-checkmark .check-icon .icon-line.line-tip {
+    top: 46px;
+    left: 14px;
+    width: 25px;
+    transform: rotate(45deg);
+    animation: icon-line-tip 0.75s;
+}
+
+.success-checkmark .check-icon .icon-line.line-long {
+    top: 38px;
+    right: 8px;
+    width: 47px;
+    transform: rotate(-45deg);
+    animation: icon-line-long 0.75s;
+}
+
+.success-checkmark .check-icon .icon-circle {
+    top: -4px;
+    left: -4px;
+    z-index: 10;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    position: absolute;
+    box-sizing: content-box;
+    border: 4px solid rgba(76, 175, 80, .5);
+}
+
+.success-checkmark .check-icon .icon-fix {
+    top: 8px;
+    width: 5px;
+    left: 26px;
+    z-index: 1;
+    height: 85px;
+    position: absolute;
+    transform: rotate(-45deg);
+    background-color: #FFFFFF;
+}
+
+@keyframes rotate-circle {
+    0% { transform: rotate(-45deg); }
+    5% { transform: rotate(-45deg); }
+    12% { transform: rotate(-405deg); }
+    100% { transform: rotate(-405deg); }
+}
+
+@keyframes icon-line-tip {
+    0% { width: 0; left: 1px; top: 19px; }
+    54% { width: 0; left: 1px; top: 19px; }
+    70% { width: 50px; left: -8px; top: 37px; }
+    84% { width: 17px; left: 21px; top: 48px; }
+    100% { width: 25px; left: 14px; top: 46px; }
+}
+
+@keyframes icon-line-long {
+    0% { width: 0; right: 46px; top: 54px; }
+    65% { width: 0; right: 46px; top: 54px; }
+    84% { width: 55px; right: 0px; top: 35px; }
+    100% { width: 47px; right: 8px; top: 38px; }
+}
+
+/* Card Hover Effects */
+.card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
+
+/* Status Icons */
+.pending-icon {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: rgba(255, 193, 7, 0.1);
+}
+
+/* Table Styles */
+.table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* Button Hover Effects */
+.btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
+}
+
+/* Badge Styles */
+.badge {
+    padding: 0.5em 1em;
+    font-weight: 500;
+}
+
+/* Print Styles */
+@media print {
+    .btn, .navbar, .footer-section {
+        display: none !important;
+    }
+    .card {
+        border: 1px solid #dee2e6 !important;
+        box-shadow: none !important;
+    }
+    .card:hover {
+        transform: none !important;
+    }
+}
+
+/* Timeline Styles */
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 1.5rem;
+    padding-left: 15px;
+}
+
+.timeline-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 20px;
+    bottom: 0;
+    width: 2px;
+    background-color: #e9ecef;
+}
+
+.timeline-item i {
+    position: absolute;
+    left: -30px;
+    top: 4px;
+    font-size: 0.5rem;
+}
+
+.timeline-item span {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.timeline-item small {
+    color: #6c757d;
+}
+
+/* Enhanced Order Timeline Styles */
+.order-timeline {
+    position: relative;
+    padding: 0;
+}
+
+.timeline-step {
+    position: relative;
+    padding-left: 45px;
+    margin-bottom: 40px;
+}
+
+.timeline-step:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-step::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 30px;
+    bottom: -40px;
+    width: 2px;
+    background-color: #e9ecef;
+}
+
+.timeline-step:last-child::before {
+    display: none;
+}
+
+.timeline-step.completed::before {
+    background-color: #28a745;
+}
+
+.timeline-icon {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+.timeline-step.completed .timeline-icon {
+    background-color: #28a745;
+    color: white;
+}
+
+.timeline-content {
+    background-color: #f8f9fa;
+    padding: 15px 20px;
+    border-radius: 8px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.timeline-step.completed .timeline-content {
+    background-color: #e8f5e9;
+}
+
+.timeline-content h6 {
+    color: #333;
+    margin: 0;
+    font-weight: 600;
+}
+
+.timeline-content p {
+    margin: 0;
+}
+
+.timeline-step:hover .timeline-content {
+    transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* Badge Enhancement */
+.badge {
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+/* Product Image Styles */
+.product-img {
+    border: 1px solid #e9ecef;
+    transition: transform 0.2s ease;
+}
+
+.product-img:hover {
+    transform: scale(1.05);
+}
+
+/* Quantity Badge Styles */
+.quantity-badge {
+    background-color: #e9ecef;
+    border-radius: 20px;
+    padding: 6px 12px;
+    display: inline-block;
+    min-width: 40px;
+}
+
+.quantity-badge .fw-medium {
+    color: #495057;
+}
+
+/* Empty State Styles */
+.empty-state {
+    padding: 2rem;
+    text-align: center;
+}
+
+.empty-state img {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+}
+
+/* Category Badge Styles */
+.badge.bg-light {
+    border: 1px solid #dee2e6;
+    font-weight: 500;
+    font-size: 0.75rem;
+}
+</style>
+{% endblock %}

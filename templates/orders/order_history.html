@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Orders{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">My Orders</h1>
+    
+    {% if orders %}
+        {% for order in orders %}
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">Order #{{ order.order_id }}</h5>
+                            <small class="text-muted">Placed on {{ order.created_at|date:"F j, Y" }}</small>
+                        </div>
+                        <div>
+                            <span class="badge {% if order.status == 'pending' %}bg-warning
+                                              {% elif order.status == 'processing' %}bg-info
+                                              {% elif order.status == 'shipped' %}bg-primary
+                                              {% elif order.status == 'delivered' %}bg-success
+                                              {% else %}bg-danger{% endif %}">
+                                {{ order.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6 class="mb-3">Order Items</h6>
+                            {% for item in order.items.all %}
+                                <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+                                    <div class="me-4" style="width: 150px; height: 150px;">
+                                        {% with primary_image=item.product.images.filter.is_primary.first %}
+                                            {% if primary_image %}
+                                                <img src="{{ primary_image.image.url }}" 
+                                                     alt="{{ item.product.name }}" 
+                                                     class="img-thumbnail rounded shadow-sm" 
+                                                     style="width: 100%; height: 100%; object-fit: cover;">
+                                            {% else %}
+                                                {% with first_image=item.product.images.first %}
+                                                    {% if first_image %}
+                                                        <img src="{{ first_image.image.url }}" 
+                                                             alt="{{ item.product.name }}" 
+                                                             class="img-thumbnail rounded shadow-sm" 
+                                                             style="width: 100%; height: 100%; object-fit: cover;">
+                                                    {% else %}
+                                                        <div class="bg-light d-flex align-items-center justify-content-center h-100 rounded shadow-sm">
+                                                            <i class="fas fa-image text-muted fa-3x"></i>
+                                                        </div>
+                                                    {% endif %}
+                                                {% endwith %}
+                                            {% endif %}
+                                        {% endwith %}
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h5 class="mb-2">{{ item.product.name }}</h5>
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <p class="mb-2">
+                                                    <span class="badge bg-secondary me-2 px-3 py-2">Qty: {{ item.quantity }}</span>
+                                                    <span class="text-muted fs-5">${{ item.price }} each</span>
+                                                </p>
+                                                <p class="mb-3 text-primary"><strong class="fs-5">Total: ${{ item.total }}</strong></p>
+                                                <a href="{% url 'product_detail' item.product.slug %}" class="btn btn-outline-secondary">
+                                                    <i class="fas fa-eye me-1"></i>View Product
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="mb-3">Order Summary</h6>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Subtotal:</span>
+                                        <span>${{ order.subtotal }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Shipping:</span>
+                                        <span>Free</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Tax:</span>
+                                        <span>${{ order.tax_amount }}</span>
+                                    </div>
+                                    <hr>
+                                    <div class="d-flex justify-content-between">
+                                        <strong>Total:</strong>
+                                        <strong class="text-primary">${{ order.total_amount }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3 d-grid gap-2">
+                                <a href="{% url 'order_detail' order.order_id %}" class="btn btn-primary">
+                                    <i class="fas fa-eye me-1"></i>View Details
+                                </a>
+                                <a href="{% url 'track_order' order.order_id %}" class="btn btn-info">
+                                    <i class="fas fa-truck me-1"></i>Track Order
+                                </a>
+                                <a href="{% url 'download_invoice' order.order_id %}" class="btn btn-success">
+                                    <i class="fas fa-download me-1"></i>Download Invoice
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+            <h3>No Orders Yet</h3>
+            <p class="text-muted">You haven't placed any orders yet.</p>
+            <a href="{% url 'products_list' %}" class="btn btn-primary">
+                <i class="fas fa-shopping-cart me-1"></i>Start Shopping
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

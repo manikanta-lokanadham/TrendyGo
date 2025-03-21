@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Wishlist{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">My Account</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'dashboard' %}" class="list-group-item list-group-item-action {% if active_tab == 'dashboard' %}active{% endif %}">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </a>
+                    <a href="{% url 'profile' %}" class="list-group-item list-group-item-action {% if active_tab == 'profile' %}active{% endif %}">
+                        <i class="fas fa-user me-2"></i>My Profile
+                    </a>
+                    <a href="{% url 'orders_list' %}" class="list-group-item list-group-item-action {% if active_tab == 'orders' %}active{% endif %}">
+                        <i class="fas fa-shopping-bag me-2"></i>My Orders
+                    </a>
+                    <a href="{% url 'account_wishlist' %}" class="list-group-item list-group-item-action {% if active_tab == 'wishlist' %}active{% endif %}">
+                        <i class="fas fa-heart me-2"></i>Wishlist
+                    </a>
+                    <a href="{% url 'addresses' %}" class="list-group-item list-group-item-action {% if active_tab == 'addresses' %}active{% endif %}">
+                        <i class="fas fa-map-marker-alt me-2"></i>Addresses
+                    </a>
+                    <a href="{% url 'change_password' %}" class="list-group-item list-group-item-action {% if active_tab == 'password' %}active{% endif %}">
+                        <i class="fas fa-lock me-2"></i>Change Password
+                    </a>
+                    <a href="{% url 'logout' %}" class="list-group-item list-group-item-action list-group-item-danger">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">My Wishlist</h5>
+                    <span class="badge bg-primary">{{ wishlist_items|length }} items</span>
+                </div>
+                <div class="card-body">
+                    {% if wishlist_items %}
+                        <div class="row row-cols-1 row-cols-md-2 g-4">
+                            {% for item in wishlist_items %}
+                                <div class="col">
+                                    <div class="card h-100">
+                                        {% if item.product.images.exists %}
+                                            <img src="{{ item.product.images.first.image.url }}" class="card-img-top" alt="{{ item.product.name }}" style="height: 200px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                                <i class="fas fa-image fa-3x text-muted"></i>
+                                            </div>
+                                        {% endif %}
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{ item.product.name }}</h6>
+                                            <p class="card-text text-muted">{{ item.product.description|truncatewords:20 }}</p>
+                                            <p class="card-text"><strong>Price: ${{ item.product.price }}</strong></p>
+                                        </div>
+                                        <div class="card-footer bg-transparent">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <a href="{% url 'product_detail' item.product.id %}" class="btn btn-primary btn-sm">
+                                                    <i class="fas fa-eye me-1"></i> View Details
+                                                </a>
+                                                <form method="POST" action="{% url 'remove_from_wishlist' item.product.id %}" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-heart-broken fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Your wishlist is empty</h5>
+                            <p class="text-muted">Add items to your wishlist to keep track of products you love.</p>
+                            <a href="{% url 'products_list' %}" class="btn btn-primary">
+                                <i class="fas fa-shopping-bag me-2"></i>Browse Products
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

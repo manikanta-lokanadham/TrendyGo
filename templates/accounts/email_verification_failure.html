@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-body p-5 text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-exclamation-circle text-danger" style="font-size: 4rem;"></i>
+                    </div>
+                    
+                    <h2 class="fw-bold mb-3">Verification Failed</h2>
+                    <p class="text-muted mb-4">We couldn't verify your email address. The verification link may have expired or is invalid.</p>
+                    
+                    <div class="alert alert-warning">
+                        <p class="mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Please request a new verification email to try again.
+                        </p>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-primary" id="resendEmail">
+                            <i class="fas fa-redo me-2"></i>Request New Verification Email
+                        </button>
+                        <a href="{% url 'login' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-sign-in-alt me-2"></i>Back to Login
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+.card {
+    border: none;
+    border-radius: 10px;
+}
+
+.btn {
+    padding: 0.75rem;
+    font-weight: 500;
+}
+
+.alert {
+    border: none;
+    border-radius: 10px;
+}
+
+.btn-outline-primary:hover {
+    background-color: #0d6efd;
+    color: white;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('resendEmail').addEventListener('click', function() {
+    // Show loading state
+    this.disabled = true;
+    this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
+    
+    // Make API call to resend verification email
+    fetch('{% url "resend_verification_email" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            alert('A new verification email has been sent. Please check your inbox.');
+        } else {
+            // Show error message
+            alert('Failed to send verification email. Please try again later.');
+        }
+    })
+    .catch(error => {
+        // Show error message
+        alert('An error occurred. Please try again later.');
+    })
+    .finally(() => {
+        // Reset button state
+        this.disabled = false;
+        this.innerHTML = '<i class="fas fa-redo me-2"></i>Request New Verification Email';
+    });
+});
+</script>
+{% endblock %}
+{% endblock %} 

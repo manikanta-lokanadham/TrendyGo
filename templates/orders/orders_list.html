@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Orders{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">My Account</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'dashboard' %}" class="list-group-item list-group-item-action {% if active_tab == 'dashboard' %}active{% endif %}">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </a>
+                    <a href="{% url 'profile' %}" class="list-group-item list-group-item-action {% if active_tab == 'profile' %}active{% endif %}">
+                        <i class="fas fa-user me-2"></i>My Profile
+                    </a>
+                    <a href="{% url 'orders_list' %}" class="list-group-item list-group-item-action {% if active_tab == 'orders' %}active{% endif %}">
+                        <i class="fas fa-shopping-bag me-2"></i>My Orders
+                    </a>
+                    <a href="{% url 'account_wishlist' %}" class="list-group-item list-group-item-action {% if active_tab == 'wishlist' %}active{% endif %}">
+                        <i class="fas fa-heart me-2"></i>Wishlist
+                    </a>
+                    <a href="{% url 'addresses' %}" class="list-group-item list-group-item-action {% if active_tab == 'addresses' %}active{% endif %}">
+                        <i class="fas fa-map-marker-alt me-2"></i>Addresses
+                    </a>
+                    <a href="{% url 'change_password' %}" class="list-group-item list-group-item-action {% if active_tab == 'password' %}active{% endif %}">
+                        <i class="fas fa-lock me-2"></i>Change Password
+                    </a>
+                    <a href="{% url 'logout' %}" class="list-group-item list-group-item-action text-danger">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">My Orders</h5>
+                </div>
+                <div class="card-body">
+                    {% if orders %}
+                        {% for order in orders %}
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h6 class="mb-0">Order #{{ order.order_id }}</h6>
+                                        <small class="text-muted">Placed on {{ order.created_at|date:"F d, Y" }}</small>
+                                    </div>
+                                    <div class="col-auto">
+                                        <span class="badge {% if order.status == 'completed' %}bg-success{% elif order.status == 'pending' %}bg-warning{% elif order.status == 'cancelled' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                            {{ order.get_status_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Product</th>
+                                                <th>Price</th>
+                                                <th>Quantity</th>
+                                                <th class="text-end">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in order.items.all %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        {% if item.product.image %}
+                                                            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="img-thumbnail me-3" style="width: 50px;">
+                                                        {% else %}
+                                                            <img src="{% static 'images/no-image.png' %}" alt="No Image" class="img-thumbnail me-3" style="width: 50px;">
+                                                        {% endif %}
+                                                        <div>
+                                                            <h6 class="mb-0">{{ item.product.name }}</h6>
+                                                            <small class="text-muted">{{ item.product.category }}</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>${{ item.price }}</td>
+                                                <td>{{ item.quantity }}</td>
+                                                <td class="text-end">${{ item.total }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="3" class="text-end">Subtotal:</td>
+                                                <td class="text-end">${{ order.subtotal }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="3" class="text-end">Shipping:</td>
+                                                <td class="text-end">${{ order.shipping_cost }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="3" class="text-end">Tax:</td>
+                                                <td class="text-end">${{ order.tax }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                                <td class="text-end"><strong>${{ order.total }}</strong></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                                <div class="mt-3">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6 class="mb-2">Shipping Address</h6>
+                                            <p class="mb-0">{{ order.first_name }} {{ order.last_name }}</p>
+                                            <p class="mb-0">{{ order.phone }}</p>
+                                            <p class="mb-0">{{ order.shipping_address|linebreaks }}</p>
+                                        </div>
+                                        <div class="col-md-6 text-md-end">
+                                            <a href="{% url 'track_order' order.order_id %}" class="btn btn-primary">
+                                                <i class="fas fa-truck me-2"></i>Track Order
+                                            </a>
+                                            <a href="{% url 'download_invoice' order.order_id %}" class="btn btn-outline-primary">
+                                                <i class="fas fa-file-invoice me-2"></i>Download Invoice
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-shopping-bag fa-3x text-muted mb-3"></i>
+                            <h5>No Orders Found</h5>
+                            <p class="text-muted mb-3">You haven't placed any orders yet.</p>
+                            <a href="{% url 'products_list' %}" class="btn btn-primary">
+                                <i class="fas fa-shopping-cart me-2"></i>Start Shopping
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

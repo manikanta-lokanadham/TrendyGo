@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Categories | AI E-Commerce{% endblock %}
+
+{% block content %}
+<h1>Product Categories</h1>
+
+<div class="categories-grid">
+    {% for category in categories %}
+        <div class="category-card">
+            <a href="/products/?category={{ category.id }}">
+                {% if category.image %}
+                    <img src="{{ category.image.url }}" alt="{{ category.name }}">
+                {% else %}
+                    <img src="{% static 'images/no-image.png' %}" alt="No image available">
+                {% endif %}
+                <h2 class="category-name">{{ category.name }}</h2>
+                <p class="category-description">{{ category.description }}</p>
+            </a>
+        </div>
+    {% empty %}
+        <p class="no-categories">No categories available.</p>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .categories-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .category-card {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+        background-color: white;
+    }
+    
+    .category-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .category-card a {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .category-card img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+    
+    .category-name {
+        font-size: 1.5rem;
+        margin: 15px;
+        color: #333;
+    }
+    
+    .category-description {
+        margin: 0 15px 15px;
+        color: #666;
+    }
+    
+    .no-categories {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 50px;
+        background-color: white;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+    }
+</style>
+{% endblock %} 

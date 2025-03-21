@@ -1,0 +1,274 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}AI-Powered E-Commerce - Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section with AI Assistant -->
+<div class="hero-section position-relative mb-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card bg-gradient-primary text-white border-0">
+                <img src="https://images.unsplash.com/photo-1607082350899-7e105aa886ae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                     class="card-img" alt="Hero Image" style="height: 500px; object-fit: cover; opacity: 0.8;">
+                <div class="card-img-overlay d-flex flex-column justify-content-center">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h1 class="display-4 fw-bold mb-4">AI-Powered Shopping Experience</h1>
+                                <p class="lead mb-4">Discover products tailored to your preferences with our advanced recommendation system</p>
+                                <div class="d-flex gap-3">
+                                    <a href="/products/" class="btn btn-light btn-lg">Shop Now</a>
+                                    <a href="/about/" class="btn btn-outline-light btn-lg">Learn More</a>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="ai-assistant-card bg-white text-dark p-4 rounded-3 shadow-lg">
+                                    <h4 class="mb-3">AI Shopping Assistant</h4>
+                                    <div class="chat-interface">
+                                        <div class="chat-messages mb-3" style="height: 200px; overflow-y: auto;">
+                                            <div class="message ai-message mb-2">
+                                                <p class="mb-0">Hello! I'm your AI shopping assistant. How can I help you today?</p>
+                                            </div>
+                                        </div>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" placeholder="Ask me anything...">
+                                            <button class="btn btn-primary">Send</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AI Features Grid -->
+<div class="container mb-5">
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="feature-card text-center p-4 rounded-3 bg-light h-100">
+                <i class="fas fa-robot fa-2x text-primary mb-3"></i>
+                <h5>Smart Search</h5>
+                <p class="small">AI-powered search with voice and image recognition</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="feature-card text-center p-4 rounded-3 bg-light h-100">
+                <i class="fas fa-vr-cardboard fa-2x text-primary mb-3"></i>
+                <h5>AR Try-On</h5>
+                <p class="small">Virtual try-on for clothes and accessories</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="feature-card text-center p-4 rounded-3 bg-light h-100">
+                <i class="fas fa-chart-bar fa-2x text-primary mb-3"></i>
+                <h5>Dynamic Pricing</h5>
+                <p class="small">AI-based pricing and personalized discounts</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="feature-card text-center p-4 rounded-3 bg-light h-100">
+                <i class="fas fa-shield-alt fa-2x text-primary mb-3"></i>
+                <h5>Fraud Protection</h5>
+                <p class="small">AI-powered security for safe transactions</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Personalized Recommendations Section -->
+{% if user.is_authenticated and recommended_products %}
+<div class="container mb-5">
+    <div class="section-header d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Recommended For You</h2>
+            <p class="text-muted mb-0">Based on your preferences and browsing history</p>
+        </div>
+        <a href="/products/" class="btn btn-outline-primary">View All</a>
+    </div>
+    <div class="row g-4">
+        {% for product in recommended_products %}
+        <div class="col-md-3">
+            <div class="product-card card h-100 border-0 shadow-sm">
+                <div class="position-relative">
+                    {% if product.primary_image %}
+                    <img src="{{ product.primary_image.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                    {% else %}
+                    <img src="{% static 'images/no-image.png' %}" class="card-img-top" alt="No Image" style="height: 200px; object-fit: contain; background-color: #f8f9fa;">
+                    {% endif %}
+                    {% if product.sale_price %}
+                    <span class="badge bg-danger position-absolute top-0 end-0 m-2">Sale</span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text text-muted small">{{ product.category.name }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            {% if product.sale_price %}
+                            <span class="text-decoration-line-through text-muted small">${{ product.price }}</span>
+                            <span class="text-danger fw-bold">${{ product.sale_price }}</span>
+                            {% else %}
+                            <span class="fw-bold">${{ product.price }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="text-warning">
+                            {% for i in "12345" %}
+                            {% if forloop.counter <= product.rating %}
+                            <i class="fas fa-star"></i>
+                            {% else %}
+                            <i class="far fa-star"></i>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-top-0">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'products:product-detail' product.id %}" class="btn btn-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Featured Categories with AR Preview -->
+<div class="container mb-5">
+    <div class="section-header text-center mb-4">
+        <h2>Shop by Category</h2>
+        <p class="text-muted">Explore our curated collection with AR preview</p>
+    </div>
+    <div class="row g-4">
+        {% for category in categories %}
+        <div class="col-md-4">
+            <div class="category-card card h-100 border-0 shadow-sm overflow-hidden">
+                <div class="position-relative">
+                    {% if category.image %}
+                    <img src="{{ category.image.url }}" class="card-img-top" alt="{{ category.name }}" style="height: 250px; object-fit: cover;">
+                    {% else %}
+                    <img src="{% static 'images/no-image.png' %}" class="card-img-top" alt="No Image" style="height: 200px; object-fit: contain; background-color: #f8f9fa;">
+                    {% endif %}
+                    <div class="position-absolute bottom-0 start-0 w-100 p-3 bg-gradient-dark text-white">
+                        <h5 class="card-title mb-1">{{ category.name }}</h5>
+                        <p class="card-text small mb-2">{{ category.description|truncatechars:100 }}</p>
+                        <div class="d-flex gap-2">
+                            <a href="/products/?category={{ category.id }}" class="btn btn-light btn-sm">Browse</a>
+                            <button class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#arPreviewModal">
+                                <i class="fas fa-vr-cardboard"></i> AR Preview
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- AI Shopping Assistant Modal -->
+<div class="modal fade" id="aiAssistantModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">AI Shopping Assistant</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="chat-interface">
+                    <div class="chat-messages mb-3" style="height: 300px; overflow-y: auto;">
+                        <div class="message ai-message mb-2">
+                            <p class="mb-0">Hello! I'm your AI shopping assistant. How can I help you today?</p>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Ask me anything...">
+                        <button class="btn btn-primary">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AR Preview Modal -->
+<div class="modal fade" id="arPreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">AR Product Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="ar-preview-container text-center">
+                    <div class="ar-placeholder bg-light rounded-3 p-5">
+                        <i class="fas fa-vr-cardboard fa-3x text-primary mb-3"></i>
+                        <h5>AR Preview Coming Soon</h5>
+                        <p class="text-muted">Try our products virtually using AR technology</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+}
+
+.feature-card {
+    transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+
+.product-card {
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+}
+
+.category-card {
+    transition: transform 0.3s ease;
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+}
+
+.bg-gradient-dark {
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+}
+
+.message {
+    padding: 10px 15px;
+    border-radius: 15px;
+    max-width: 80%;
+}
+
+.ai-message {
+    background-color: #f8f9fa;
+    margin-right: auto;
+}
+
+.user-message {
+    background-color: #e3f2fd;
+    margin-left: auto;
+}
+</style>
+{% endblock %} 

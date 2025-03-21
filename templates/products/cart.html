@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Shopping Cart{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5" style="background-color: #f8f9fa;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-12">
+                <div class="d-flex align-items-center mb-5">
+                    <div class="bg-primary rounded-circle p-3 me-4">
+                        <i class="fa-solid fa-cart-shopping fa-3x text-white"></i>
+                    </div>
+                    <h1 class="mb-0 display-4 fw-bold">Shopping Cart</h1>
+                </div>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                {% if cart_items %}
+                    <div class="row g-4">
+                        <!-- Cart Items -->
+                        <div class="col-lg-8">
+                            <div class="card shadow-sm border-0 rounded-4">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h4 class="mb-0 fw-bold">Your Items</h4>
+                                        <span class="badge bg-primary rounded-pill px-4 py-2 fs-6">{{ cart_items|length }} items</span>
+                                    </div>
+                                    
+                                    {% for item in cart_items %}
+                                        <div class="card mb-3 border-0 rounded-3" style="background-color: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                            <div class="card-body p-3">
+                                                <div class="row align-items-center">
+                                                    <div class="col-2">
+                                                        {% if item.product.images.exists %}
+                                                            <img src="{{ item.product.images.first.image.url }}" 
+                                                                alt="{{ item.product.name }}" 
+                                                                class="img-fluid rounded-3" style="max-height: 100px; width: auto; object-fit: cover;">
+                                                        {% else %}
+                                                            <img src="{% static 'images/no-image.png' %}" 
+                                                                alt="{{ item.product.name }}" 
+                                                                class="img-fluid rounded-3" style="max-height: 100px; width: auto; object-fit: cover;">
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="col-5">
+                                                        <h5 class="mb-2 fw-bold">{{ item.product.name }}</h5>
+                                                        <p class="text-muted mb-0 fs-6">₹{{ item.product.price|floatformat:2 }}</p>
+                                                    </div>
+                                                    <div class="col-2">
+                                                        <form action="{% url 'update_cart' item.id %}" method="POST">
+                                                            {% csrf_token %}
+                                                            <div class="input-group input-group-sm">
+                                                                <input type="number" name="quantity" value="{{ item.quantity }}" 
+                                                                    min="1" class="form-control text-center">
+                                                                <button type="submit" class="btn btn-outline-primary">
+                                                                    <i class="fa-solid fa-arrows-rotate"></i>
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                    <div class="col-2 text-end">
+                                                        <h6 class="mb-0 fw-bold text-primary">₹{{ item.total_price|floatformat:2 }}</h6>
+                                                    </div>
+                                                    <div class="col-1 text-end">
+                                                        <form action="{% url 'remove_from_cart' item.id %}" method="POST" class="d-inline">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle p-2" 
+                                                                    style="width: 32px; height: 32px; line-height: 1;"
+                                                                    title="Remove item">
+                                                                <i class="fa-solid fa-xmark"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order Summary -->
+                        <div class="col-lg-4">
+                            <div class="card shadow-sm border-0 rounded-4">
+                                <div class="card-body p-4">
+                                    <h4 class="mb-4 fw-bold">Order Summary</h4>
+                                    
+                                    <div class="d-flex justify-content-between mb-3">
+                                        <span class="text-muted">Subtotal</span>
+                                        <span>₹{{ cart_total|floatformat:2 }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-3">
+                                        <span class="text-muted">Shipping</span>
+                                        <span>₹{{ shipping_cost|floatformat:2 }}</span>
+                                    </div>
+                                    {% if discount_amount > 0 %}
+                                    <div class="d-flex justify-content-between mb-3 text-success">
+                                        <span>Discount</span>
+                                        <span>-₹{{ discount_amount|floatformat:2 }}</span>
+                                    </div>
+                                    {% endif %}
+                                    <hr class="my-3">
+                                    <div class="d-flex justify-content-between mb-4">
+                                        <strong>Total</strong>
+                                        <strong class="text-primary">₹{{ final_total|floatformat:2 }}</strong>
+                                    </div>
+                                    
+                                    <!-- Coupon Code Form -->
+                                    <form method="POST" action="{% url 'apply_coupon' %}" class="mb-4">
+                                        {% csrf_token %}
+                                        <div class="input-group">
+                                            <input type="text" name="code" class="form-control" placeholder="Enter coupon code">
+                                            <button class="btn btn-outline-primary" type="submit">Apply</button>
+                                        </div>
+                                    </form>
+
+                                    <a href="{% url 'checkout' %}" class="btn btn-primary w-100 py-3">
+                                        <i class="fa-solid fa-lock me-2"></i>Proceed to Checkout
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <div class="bg-light rounded-circle p-4 d-inline-block mb-4">
+                            <i class="fa-solid fa-cart-shopping text-muted fa-5x"></i>
+                        </div>
+                        <h2 class="mb-3 fw-bold">Your cart is empty</h2>
+                        <p class="text-muted mb-4">Looks like you haven't added any items to your cart yet.</p>
+                        <a href="{% url 'products_list' %}" class="btn btn-primary px-4 py-2">
+                            <i class="fa-solid fa-shopping-bag me-2"></i>Browse Products
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

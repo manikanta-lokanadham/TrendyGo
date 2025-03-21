@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Order Summary -->
+        <div class="col-lg-4 order-lg-2">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h4 class="card-title mb-4">Order Summary</h4>
+                    
+                    <!-- Cart Items -->
+                    {% for item in cart_items %}
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h6 class="mb-1">{{ item.product.name }}</h6>
+                            <div class="text-muted small">₹{{ item.product.price|floatformat:2 }} × {{ item.quantity }}</div>
+                        </div>
+                        <strong>₹{{ item.total_price|floatformat:2 }}</strong>
+                    </div>
+                    {% endfor %}
+                    
+                    <hr>
+                    
+                    <!-- Order Calculations -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Total Amount</span>
+                            <strong>₹{{ total|default:0|floatformat:2 }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Shipping Fee</span>
+                            <span class="text-success">Free</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Tax (10%)</span>
+                            <span>₹{{ tax|default:0|floatformat:2 }}</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Total Payable</h5>
+                            <div>
+                                <h4 class="mb-0 text-primary">₹{{ total|default:0|floatformat:2 }}</h4>
+                                <small class="text-muted text-end d-block">+Tax Extra</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Checkout Form -->
+        <div class="col-lg-8 order-lg-1">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title mb-4">Shipping Details</h4>
+                    
+                    <form method="POST" action="{% url 'place_order' %}" id="checkout-form">
+                        {% csrf_token %}
+                        
+                        <!-- Personal Information -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="first_name" class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="first_name" name="first_name" value="{{ request.user.first_name }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="last_name" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="last_name" name="last_name" value="{{ request.user.last_name }}" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ request.user.email }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" value="08179927336" required>
+                        </div>
+
+                        <!-- Shipping Address Section -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">Shipping Address</h5>
+                            </div>
+
+                            <!-- Saved Addresses -->
+                            {% if addresses %}
+                            <div class="mb-3">
+                                <h6>Select Saved Address</h6>
+                                <div class="row g-3">
+                                    {% for address in addresses %}
+                                    <div class="col-md-6">
+                                        <div class="card h-100 {% if address.is_default %}border-primary{% endif %} {% if selected_address == address.id %}border-success{% endif %}">
+                                            <div class="card-body">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="selected_address" 
+                                                           id="address_{{ address.id }}" value="{{ address.id }}"
+                                                           {% if selected_address == address.id or address.is_default and not selected_address %}checked{% endif %}>
+                                                    <label class="form-check-label" for="address_{{ address.id }}">
+                                                        <div class="d-flex justify-content-between align-items-start">
+                                                            <div>
+                                                                <strong class="d-block mb-1">{{ address.address_line1 }}</strong>
+                                                                {% if address.address_line2 %}
+                                                                    {{ address.address_line2 }}<br>
+                                                                {% endif %}
+                                                                {{ address.city }}, {{ address.state }} {{ address.postal_code }}<br>
+                                                                {{ address.get_country_display }}
+                                                            </div>
+                                                            {% if address.is_default %}
+                                                                <span class="badge bg-primary">Default</span>
+                                                            {% endif %}
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#new-address-form">
+                                    <i class="fas fa-plus me-1"></i>Add New Address
+                                </button>
+                            </div>
+                            {% endif %}
+
+                            <!-- New Address Form -->
+                            <div id="new-address-form" class="{% if addresses %}collapse{% endif %}">
+                                <h6 class="mb-3">{% if addresses %}Add New Address{% else %}Enter Shipping Address{% endif %}</h6>
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label for="address_line1" class="form-label">Address Line 1 *</label>
+                                        <input type="text" class="form-control" id="address_line1" name="address_line1" required>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label for="address_line2" class="form-label">Address Line 2</label>
+                                        <input type="text" class="form-control" id="address_line2" name="address_line2">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="city" class="form-label">City *</label>
+                                        <input type="text" class="form-control" id="city" name="city" required>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="state" class="form-label">State/Province *</label>
+                                        <input type="text" class="form-control" id="state" name="state" required>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="postal_code" class="form-label">Postal Code *</label>
+                                        <input type="text" class="form-control" id="postal_code" name="postal_code" required>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="country" class="form-label">Country *</label>
+                                        <select class="form-select" id="country" name="country" required>
+                                            <option value="">Select Country</option>
+                                            <option value="IN">India</option>
+                                            <option value="US">United States</option>
+                                            <option value="GB">United Kingdom</option>
+                                            <option value="CA">Canada</option>
+                                            <option value="AU">Australia</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" id="set_default" name="set_default" {% if not addresses %}checked disabled{% endif %}>
+                                            <label class="form-check-label" for="set_default">
+                                                Set as default address {% if not addresses %}(First address will be set as default){% endif %}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Payment Method -->
+                        <div class="mb-4">
+                            <h5 class="mb-3">Payment Method</h5>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="payment_method" id="cod" value="cod" checked>
+                                <label class="form-check-label" for="cod">
+                                    Cash on Delivery
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="payment_method" id="card" value="card">
+                                <label class="form-check-label" for="card">
+                                    Credit/Debit Card
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="payment_method" id="upi" value="upi">
+                                <label class="form-check-label" for="upi">
+                                    UPI
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Order Notes -->
+                        <div class="mb-4">
+                            <label for="notes" class="form-label">Order Notes (Optional)</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Special instructions for delivery"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            Place Order
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleButton = document.getElementById('toggle-new-address');
+    const newAddressForm = document.getElementById('new-address-form');
+    const addressInputs = document.querySelectorAll('#new-address-form input, #new-address-form select');
+    const selectedAddressInputs = document.querySelectorAll('input[name="selected_address"]');
+    
+    function toggleAddressFormValidation(required) {
+        addressInputs.forEach(input => {
+            if (input.name !== 'address_line2') {  // Address line 2 is optional
+                input.required = required;
+            }
+        });
+    }
+    
+    if (toggleButton) {
+        toggleButton.addEventListener('click', function() {
+            const isHidden = newAddressForm.style.display === 'none';
+            newAddressForm.style.display = isHidden ? 'block' : 'none';
+            toggleAddressFormValidation(isHidden);
+            
+            // Clear selected address when showing new address form
+            if (isHidden) {
+                selectedAddressInputs.forEach(input => input.checked = false);
+            }
+        });
+    }
+    
+    // Handle address selection
+    selectedAddressInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            if (this.checked) {
+                newAddressForm.style.display = 'none';
+                toggleAddressFormValidation(false);
+            }
+        });
+    });
+    
+    // Initial validation state
+    toggleAddressFormValidation(!selectedAddressInputs.length || !Array.from(selectedAddressInputs).some(input => input.checked));
+});
+</script>
+{% endblock %}
+{% endblock %} 
