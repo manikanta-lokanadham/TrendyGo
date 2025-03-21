@@ -13,6 +13,9 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: #333;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Card Styles */
@@ -70,8 +73,8 @@ body {
 
 /* Buttons */
 .btn-primary {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
+    background-color: #007bff;
+    border-color: #007bff;
 }
 
 .btn-primary:hover {
@@ -102,7 +105,8 @@ body {
 }
 
 .navbar-brand {
-    font-weight: 700;
+    font-size: 1.5rem;
+    font-weight: bold;
     color: #2d3748 !important;
     display: flex;
     align-items: center;
@@ -1392,4 +1396,8 @@ footer {
 
 .btn-primary .fas {
     font-size: 1rem;
+}
+
+.footer {
+    margin-top: auto;
 } 
